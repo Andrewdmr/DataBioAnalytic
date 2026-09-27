@@ -1,0 +1,14 @@
+# Archivos de datos grandes (NO subir)
+datos_originales/*.txt
+datos_originales/*.gz
+datos_originales/*.tsv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
