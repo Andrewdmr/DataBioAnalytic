@@ -1,5 +1,39 @@
 # Análisis de Red de Proteínas — Cáncer de Mama
 
+# 📑 Estructura del Proyecto
+
+```text
+\DataBioAnalytic\
+│
+├── 📁 datos_originales\
+│   ├── 9606.protein.info.v12.0.txt             # Datos de STRING
+│   ├── 9606.protein.links.v12.0.txt            # Datos de STRING
+│   └── opentargets_cancer_mama.tsv             # Datos de Open Targets
+│
+├── 📁 scripts\
+│   ├── proceso_reparacion_adn.py               # Diego
+│   ├── señalizacion_hormonal.py                # Compañero 1
+│   ├── ciclo_y_optosis.py                      # Compañero 2
+│   ├── unir_equipo.py                          # Coordinador
+│   └── analisis_algoritmos.py                  # Análisis final
+│
+├── 📁 subgrafos\
+│   ├── subgrafo_500_reparacion_adn.pkl         # Tú
+│   ├── subgrafo_500_senalizacion_hormonal.pkl  # Compañero 1
+│   └── subgrafo_500_ciclo_celular.pkl          # Compañero 2
+│
+├── 📁 resultados\
+│   ├── grafo_equipo_cancer_mama.png
+│   ├── grafo_mst_equipo.png
+│   ├── grafo_componentes.png
+│   ├── aristas_equipo_cancer_mama.csv
+│   └── metricas_equipo_cancer_mama.csv
+```
+
+### 🔗 Fuentes de datos
+* Los datos de asociaciones de cáncer de mama se descargaron desde la [Plataforma de Open Targets](https://platform.opentargets.org/disease/MONDO_0007254/associations).
+
+---
 Proyecto de análisis computacional de una red de interacciones proteína-proteína
 asociada al cáncer de mama, usando datos de STRING y Open Targets.
 
