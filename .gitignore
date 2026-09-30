@@ -1,4 +1,4 @@
-# Archivos de datos grandes (NO subir)
+# Archivos de datos grandes
 datos_originales/*.txt
 datos_originales/*.gz
 datos_originales/*.tsv
