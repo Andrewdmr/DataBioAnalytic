@@ -3,12 +3,28 @@ datos_originales/*.txt
 datos_originales/*.gz
 datos_originales/*.tsv
 
+# Caché generada por el backend
+backend/cache/
+*.npz
+
 # Python
 __pycache__/
 *.pyc
 .venv/
 venv/
+env/
 
-# Sistema operativo
+# Frontend (Node y compilación de Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+*.local
+
+# Variables de entorno
+.env
+.env.*
+
+# Sistema operativo e IDE
 .DS_Store
 Thumbs.db
+.vscode/
