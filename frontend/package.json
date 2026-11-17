@@ -1,0 +1,29 @@
+{
+  "name": "databioanalytic-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "cytoscape": "^3.35.0",
+    "lucide-react": "^1.74.0",
+    "react": "^19.3.1",
+    "react-cytoscapejs": "^2.0.0",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/cytoscape": "^3.21.9",
+    "@types/react": "^19.3.0",
+    "@types/react-cytoscapejs": "^1.2.6",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  }
+}
