@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Network, Play, RotateCcw, Route, Share2, TreePine } from 'lucide-react'
-import type { DfsResponse, Mode, MstResponse, NodeData, UnionFindResponse } from '../types'
+import { Network, Play, RotateCcw, Route, Share2, TreePine, Waves } from 'lucide-react'
+import type { DfsResponse, FlowResponse, Mode, MstResponse, NodeData, UnionFindResponse } from '../types'
 import { colorComponente } from './GraphCanvas'
 
 interface Props {
@@ -17,6 +17,8 @@ interface Props {
   onUfFocus: (i: number | null) => void
   mst: MstResponse | null
   dfs: DfsResponse | null
+  flow: FlowResponse | null
+  onRunFlow: () => void
   origen: string
   destino: string
   onOrigen: (s: string) => void
@@ -135,6 +137,34 @@ export default function LeftPanel(p: Props) {
                 ) : (
                   <span className="text-[#ff5a5a]">{p.dfs.motivo ?? 'Sin ruta'}</span>
                 )}
+              </div>
+            )}
+          </div>
+        )}
+        {modoBtn('flow', <Waves size={15} />, 'Ford-Fulkerson · flujo máximo')}
+        {p.mode === 'flow' && (
+          <div className="space-y-2 rounded-md border panel-borde bg-[#02101f] p-2 text-xs">
+            <datalist id="genes-dfs">{ids.map((g) => <option key={g} value={g} />)}</datalist>
+            {idSel(p.origen, p.onOrigen, p.pick === 'origen', 'origen')}
+            {idSel(p.destino, p.onDestino, p.pick === 'destino', 'destino')}
+            <div className="text-slate-500">Fuente = origen · Sumidero = destino. Clic en el grafo para fijar el {p.pick}.</div>
+            <button onClick={p.onRunFlow} disabled={!p.origen || !p.destino || p.busy}
+                    className="flex w-full items-center justify-center gap-1 rounded bg-[#00b7ff] py-1.5 font-semibold text-black disabled:opacity-40">
+              <Play size={12} /> Calcular flujo máximo
+            </button>
+            {p.flow && (
+              <div className="space-y-1 rounded border panel-borde p-2">
+                <div className="text-2xl font-bold text-[#00b7ff]">
+                  {p.flow.flujo_maximo} <span className="text-xs font-normal text-slate-400">flujo máximo</span>
+                </div>
+                <div className="text-slate-300">{p.flow.caminos_aumento} caminos de aumento · {p.flow.aristas_flujo.length} aristas con flujo</div>
+                <div className="text-[#ff5a5a]">Corte mínimo ({p.flow.corte_minimo.length} aristas críticas):</div>
+                <ul className="max-h-28 overflow-y-auto font-mono text-slate-200">
+                  {p.flow.corte_minimo.map((c) => (
+                    <li key={c.id}>{c.source} — {c.target} <span className="text-slate-500">({c.capacidad})</span></li>
+                  ))}
+                  {p.flow.corte_minimo.length === 0 && <li className="text-slate-500">sin conexión: flujo 0</li>}
+                </ul>
               </div>
             )}
           </div>

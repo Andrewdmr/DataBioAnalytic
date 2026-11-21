@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CytoscapeComponent from 'react-cytoscapejs'
 import type cytoscape from 'cytoscape'
 import { Download, LocateFixed, Minus, Plus } from 'lucide-react'
-import type { DfsResponse, GraphResponse, KnockoutResponse, Mode, MstResponse, UnionFindResponse } from '../types'
+import type { DfsResponse, FlowResponse, GraphResponse, KnockoutResponse, Mode, MstResponse, UnionFindResponse } from '../types'
 
 export interface ViewState {
   mode: Mode
@@ -10,6 +10,7 @@ export interface ViewState {
   ufFocus: number | null
   mst: MstResponse | null
   dfs: DfsResponse | null
+  flow: FlowResponse | null
   pathStep: number
   koGenes: string[]
   ko: KnockoutResponse | null
@@ -79,6 +80,14 @@ const STYLESHEET: cytoscape.StylesheetJson = [
   { selector: 'node.faded', style: { opacity: 0.12 } },
   { selector: 'edge.faded, edge.edgefaded', style: { opacity: 0.1 } },
   { selector: 'edge.mst', style: { width: 4.5, 'line-color': '#ffffff', opacity: 1, 'curve-style': 'bezier' } },
+  { selector: 'edge.flow', style: { 'line-color': '#00b7ff', opacity: 1, 'curve-style': 'bezier', 'z-index': 50 } },
+  {
+    selector: 'edge.cut',
+    style: {
+      width: 5, 'line-color': '#ff1a1a', 'line-style': 'dashed', 'line-dash-pattern': [6, 4],
+      opacity: 1, 'curve-style': 'bezier', 'z-index': 100,
+    },
+  },
   { selector: 'edge.path', style: { width: 6, 'line-color': '#ffee00', opacity: 1, 'curve-style': 'bezier', 'z-index': 99 } },
   { selector: 'node.path', style: { 'border-width': 4, 'border-style': 'solid', 'border-color': '#ffee00', opacity: 1, 'z-index': 99 } },
   {
@@ -197,6 +206,24 @@ export default function GraphCanvas({ graph, selected, focus, view, onNodeTap, o
       if (view.mode === 'mst' && view.mst) {
         const ids = new Set(view.mst.aristas_mst)
         cy.edges().forEach((e) => { e.addClass(ids.has(e.id()) ? 'mst' : 'edgefaded') })
+      }
+
+      if (view.mode === 'flow' && view.flow) {
+        const flujo = new Map(view.flow.aristas_flujo.map((a) => [a.id, a.flujo]))
+        const corte = new Set(view.flow.corte_minimo.map((c) => c.id))
+        const maxF = Math.max(1, ...view.flow.aristas_flujo.map((a) => a.flujo))
+        const activos = new Set<string>([view.flow.origen, view.flow.destino])
+        view.flow.aristas_flujo.forEach((a) => { activos.add(a.source); activos.add(a.target) })
+        cy.edges().forEach((e) => {
+          const f = flujo.get(e.id())
+          if (corte.has(e.id())) e.addClass('cut')
+          else if (f) { e.addClass('flow'); e.style('width', 2 + (f / maxF) * 9) }
+          else e.addClass('faded')
+        })
+        cy.nodes().forEach((n) => {
+          if (!activos.has(n.id())) n.addClass('faded')
+          else if (n.id() === view.flow!.origen || n.id() === view.flow!.destino) n.addClass('path')
+        })
       }
 
       if (view.mode === 'dfs' && view.dfs?.encontrada) {
