@@ -78,4 +78,13 @@ export interface ProteinDetail {
   interacciones: { symbol: string; combined_score: number }[]
 }
 
-export type Mode = 'none' | 'uf' | 'mst' | 'dfs'
+export interface FlowResponse {
+  origen: string
+  destino: string
+  flujo_maximo: number
+  caminos_aumento: number
+  aristas_flujo: { id: string; source: string; target: string; flujo: number; capacidad: number }[]
+  corte_minimo: { id: string; source: string; target: string; capacidad: number }[]
+}
+
+export type Mode = 'none' | 'uf' | 'mst' | 'dfs' | 'flow'

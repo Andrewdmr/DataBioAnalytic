@@ -1,5 +1,5 @@
 import type {
-  DfsResponse, GraphResponse, KnockoutResponse, MstResponse, ProteinDetail, UnionFindResponse,
+  DfsResponse, FlowResponse, GraphResponse, KnockoutResponse, MstResponse, ProteinDetail, UnionFindResponse,
 } from './types'
 
 export const API = (import.meta.env.VITE_API as string | undefined) ?? 'http://localhost:8000/api'
@@ -25,6 +25,8 @@ export const api = {
     request<DfsResponse>(
       `/algoritmos/dfs?${qs(f)}&origen=${origen}&destino=${destino}` +
       `&min_saltos=${minSaltos}&evitar_directo=${evitarDirecto}`),
+  flujo: (f: Filtros, origen: string, destino: string) =>
+    request<FlowResponse>(`/algoritmos/flujo-maximo?${qs(f)}&origen=${origen}&destino=${destino}`),
   knockout: (f: Filtros, genes: string[]) =>
     request<KnockoutResponse>('/simulacion/knockout', {
       method: 'POST',

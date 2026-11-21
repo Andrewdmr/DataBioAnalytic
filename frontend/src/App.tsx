@@ -5,7 +5,7 @@ import RightPanel from './components/RightPanel'
 import GraphCanvas, { type FocusRequest, type ViewState } from './components/GraphCanvas'
 import { api, API } from './api'
 import type {
-  DfsResponse, GraphResponse, KnockoutResponse, Mode, MstResponse, ProteinDetail, UnionFindResponse,
+  DfsResponse, FlowResponse, GraphResponse, KnockoutResponse, Mode, MstResponse, ProteinDetail, UnionFindResponse,
 } from './types'
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e))
@@ -36,6 +36,7 @@ export default function App() {
   const [ufFocus, setUfFocus] = useState<number | null>(null)
   const [mst, setMst] = useState<MstResponse | null>(null)
   const [dfs, setDfs] = useState<DfsResponse | null>(null)
+  const [flow, setFlow] = useState<FlowResponse | null>(null)
   const [pathStep, setPathStep] = useState(0)
   const [origen, setOrigen] = useState('ESR1')
   const [destino, setDestino] = useState('TP53')
@@ -69,7 +70,7 @@ export default function App() {
         if (cancel) return
         setGraph(g)
         setKoGenes([]); setKo(null); setKoError(null)
-        setUf(null); setMst(null); setDfs(null); setUfFocus(null); setAlgoError(null)
+        setUf(null); setMst(null); setDfs(null); setFlow(null); setUfFocus(null); setAlgoError(null)
         const ids = new Set(g.elements.nodes.map((n) => n.data.id))
         setSelected((s) => (s && ids.has(s) ? s : null))
       })
@@ -112,6 +113,14 @@ export default function App() {
       .finally(() => setBusy(false))
   }
 
+  const runFlow = () => {
+    setBusy(true); setAlgoError(null)
+    api.flujo(filtros, origen.trim(), destino.trim())
+      .then(setFlow)
+      .catch((e) => { setFlow(null); setAlgoError(msg(e)) })
+      .finally(() => setBusy(false))
+  }
+
   // ---- ficha + interacciones directas
   useEffect(() => {
     if (!inspected) { setDetail(null); setDetailError(null); return }
@@ -148,19 +157,19 @@ export default function App() {
   }
 
   const onNodeTap = (id: string) => {
-    if (mode === 'dfs') {
+    if (mode === 'dfs' || mode === 'flow') {
       if (pick === 'origen') { setOrigen(id); setPick('destino') } else { setDestino(id); setPick('origen') }
     }
     inspect(id, false)
   }
 
   const restaurar = () => {
-    setMode('none'); setUfFocus(null); setDfs(null); setAlgoError(null)
+    setMode('none'); setUfFocus(null); setDfs(null); setFlow(null); setAlgoError(null)
   }
 
   const view: ViewState = useMemo(
-    () => ({ mode, uf, ufFocus, mst, dfs, pathStep, koGenes, ko }),
-    [mode, uf, ufFocus, mst, dfs, pathStep, koGenes, ko],
+    () => ({ mode, uf, ufFocus, mst, dfs, flow, pathStep, koGenes, ko }),
+    [mode, uf, ufFocus, mst, dfs, flow, pathStep, koGenes, ko],
   )
 
   return (
@@ -178,7 +187,7 @@ export default function App() {
           nodes={nodes} selected={selected} onSelect={(id) => inspect(id, true)}
           koGenes={koGenes}
           mode={mode} onMode={setMode} onRestore={restaurar} busy={busy}
-          uf={uf} ufFocus={ufFocus} onUfFocus={setUfFocus} mst={mst} dfs={dfs}
+          uf={uf} ufFocus={ufFocus} onUfFocus={setUfFocus} mst={mst} dfs={dfs} flow={flow} onRunFlow={runFlow}
           origen={origen} destino={destino} onOrigen={setOrigen} onDestino={setDestino}
           pick={pick} onPick={setPick}
           minSaltos={minSaltos} onMinSaltos={setMinSaltos}
