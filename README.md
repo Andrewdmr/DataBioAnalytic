@@ -41,6 +41,8 @@ La red filtra y clasifica los genes semilla y proteínas asociadas en tres ejes 
    * Traza cascadas de señalización entre un nodo `origen` y un nodo `destino` con soporte para `evitar_directo=True` y `min_saltos`, revelando mediadores intermedios (ej. `ESR1 → AKT1 → TP53`) en lugar de atajos triviales de un solo enlace.
 4. **Simulación de Knockout Simple y Múltiple (Letalidad Sintética):**
    * Permite inhibir uno o varios genes simultáneamente (ej. `BRCA1 + PARP1` o `TP53 + AKT1`), recalculando el grafo para identificar proteínas recién aisladas y pares de genes semilla que pierden conectividad entre sí.
+ 5. **Flujo Máximo y Corte Mínimo — Ford-Fulkerson (Edmonds-Karp):**
+    * Cada interacción STRING se modela como dos aristas dirigidas con capacidad `combined_score`; los caminos de aumento se buscan con BFS sobre el grafo residual entre un `origen` (fuente) y un `destino` (sumidero). Devuelve el flujo máximo, el número de caminos de aumento, las aristas con flujo y el **corte mínimo** (enlaces cuello de botella saturados que separan ambos lados de la red).
 
 ---
 
@@ -49,7 +51,7 @@ La red filtra y clasifica los genes semilla y proteínas asociadas en tres ejes 
 ```text
 DataBioAnalytic/
 ├── backend/
-│   ├── algoritmos.py         # Implementación de Union-Find, Kruskal (MST), DFS y Knockout
+│   ├── algoritmos.py         # Implementación de Union-Find, Kruskal (MST), DFS, Ford-Fulkerson y Knockout
 │   ├── loader.py             # Cruce de STRING v12 + Open Targets y gestión de caché .npz
 │   ├── main.py               # Endpoints REST con FastAPI
 │   └── requirements.txt      # Dependencias de Python
@@ -99,5 +101,6 @@ Abre `http://localhost:5173` en tu navegador. Si necesitas apuntar a otra URL de
 * `GET /api/algoritmos/union-find` — Agrupa los nodos del subgrafo actual por componente conexo.
 * `GET /api/algoritmos/mst` — Identifica las aristas pertenecientes al Árbol de Expansión Mínima.
 * `GET /api/algoritmos/dfs?origen=ESR1&destino=TP53&min_saltos=2&evitar_directo=true` — Calcula rutas de señalización multi-salto.
+* `GET /api/algoritmos/flujo-maximo?origen=ESR1&destino=TP53&via=todas&min_score=900&max_nodos=150` — Flujo máximo (Ford-Fulkerson / Edmonds-Karp) y corte mínimo entre dos proteínas; responde 404 si alguna no está en el subgrafo.
 * `POST /api/simulacion/knockout` — Simula la eliminación de una lista de genes (`{"genes": ["BRCA1", "PARP1"]}`) y reporta el impacto topológico.
 * `GET /api/proteina/{symbol}` — Retorna metadatos de Open Targets e interacciones directas de un gen específico.
