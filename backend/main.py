@@ -56,6 +56,20 @@ def api_dfs(origen: str = "ESR1", destino: str = "TP53", via: str = "todas",
                         evitar_directo, min_saltos, max_saltos)
 
 
+@app.get("/api/algoritmos/flujo-maximo")
+def api_flujo_maximo(origen: str = "ESR1", destino: str = "TP53", via: str = "todas",
+                     min_score: int = MIN_SCORE_Q, max_nodos: int = MAX_NODOS_Q):
+    g = _subgrafo(via, min_score, max_nodos)
+    origen, destino = origen.strip().upper(), destino.strip().upper()
+    ids = set(_ids(g))
+    faltan = [x for x in (origen, destino) if x not in ids]
+    if faltan:
+        raise HTTPException(404, f"No están en el subgrafo actual: {faltan}")
+    if origen == destino:
+        raise HTTPException(400, "origen y destino deben ser distintos")
+    return alg.ford_fulkerson(_ids(g), g["edges"], origen, destino)
+
+
 class KnockoutIn(BaseModel):
     gen: Optional[str] = None            # compatibilidad: un solo gen
     genes: Optional[list[str]] = None    # knockout múltiple

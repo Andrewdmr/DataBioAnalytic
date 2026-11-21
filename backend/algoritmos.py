@@ -245,3 +245,86 @@ def knockout(nodes, edges, genes, semillas=None) -> dict:
             "aristas_mst": despues_mst["aristas_mst"],
         },
     }
+
+
+# ---------------------------------------------------------------------------
+# Ford-Fulkerson (Edmonds-Karp): flujo máximo y corte mínimo
+# ---------------------------------------------------------------------------
+def ford_fulkerson(nodos, aristas, origen: str, destino: str) -> dict:
+    """Flujo máximo origen -> destino con BFS sobre el grafo residual.
+
+    Cada interacción no dirigida de STRING se modela como dos aristas dirigidas
+    opuestas con capacidad = combined_score.
+    """
+    from collections import deque
+
+    residual: dict[str, dict[str, int]] = {n: {} for n in nodos}
+    capacidad: dict[tuple[str, str], int] = {}
+    id_arista: dict[frozenset, str] = {}
+    for e in aristas:
+        u, v, c = e["source"], e["target"], int(e["combined_score"])
+        residual[u][v] = c
+        residual[v][u] = c
+        capacidad[(u, v)] = capacidad[(v, u)] = c
+        id_arista[frozenset((u, v))] = e["id"]
+
+    flujo_maximo = 0
+    caminos_aumento = 0
+    while True:
+        # --- BFS: camino de aumento más corto en el grafo residual
+        padre = {origen: None}
+        cola = deque([origen])
+        while cola and destino not in padre:
+            u = cola.popleft()
+            for v, cap in residual[u].items():
+                if cap > 0 and v not in padre:
+                    padre[v] = u
+                    cola.append(v)
+        if destino not in padre:
+            break
+
+        # --- cuello de botella del camino y actualización del residual
+        cuello, v = float("inf"), destino
+        while padre[v] is not None:
+            cuello = min(cuello, residual[padre[v]][v])
+            v = padre[v]
+        v = destino
+        while padre[v] is not None:
+            u = padre[v]
+            residual[u][v] -= cuello
+            residual[v][u] += cuello
+            v = u
+        flujo_maximo += int(cuello)
+        caminos_aumento += 1
+
+    # --- flujo neto por arista no dirigida: capacidad - residual(u,v)
+    aristas_flujo = []
+    for e in aristas:
+        u, v = e["source"], e["target"]
+        neto = capacidad[(u, v)] - residual[u][v]
+        if neto != 0:
+            a, b = (u, v) if neto > 0 else (v, u)
+            aristas_flujo.append({"id": e["id"], "source": a, "target": b,
+                                  "flujo": abs(neto), "capacidad": capacidad[(u, v)]})
+
+    # --- corte mínimo: aristas entre S (alcanzable en el residual) y el resto
+    alcanzables = {origen}
+    cola = deque([origen])
+    while cola:
+        u = cola.popleft()
+        for v, cap in residual[u].items():
+            if cap > 0 and v not in alcanzables:
+                alcanzables.add(v)
+                cola.append(v)
+    corte_minimo = []
+    for e in aristas:
+        u, v = e["source"], e["target"]
+        if (u in alcanzables) != (v in alcanzables):
+            a, b = (u, v) if u in alcanzables else (v, u)
+            corte_minimo.append({"id": e["id"], "source": a, "target": b,
+                                 "capacidad": capacidad[(u, v)]})
+
+    return {"origen": origen, "destino": destino, "flujo_maximo": flujo_maximo,
+            "caminos_aumento": caminos_aumento, "aristas_flujo": aristas_flujo,
+            "corte_minimo": corte_minimo,
+            "nodos_lado_fuente": len(alcanzables)}
