@@ -1,14 +1,31 @@
-# Archivos de datos grandes
-datos_originales/*.txt
-datos_originales/*.gz
-datos_originales/*.tsv
+# Archivos de datos grandes (ignora todo excepto los 2 archivos ligeros necesarios)
+datos_originales/*
+!datos_originales/9606.protein.info.v12.0.txt
+!datos_originales/opentargets_cancer_mama.tsv
+
+# Caché generada por el backend (permite subir el archivo .npz ya procesado)
+backend/cache/*
+!backend/cache/links_400.npz
+
 
 # Python
 __pycache__/
 *.pyc
 .venv/
 venv/
+env/
 
-# Sistema operativo
+# Frontend (Node y compilación de Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+*.local
+
+# Variables de entorno
+.env
+.env.*
+
+# Sistema operativo e IDE
 .DS_Store
 Thumbs.db
+.vscode/
