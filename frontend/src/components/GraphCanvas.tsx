@@ -3,6 +3,7 @@ import CytoscapeComponent from 'react-cytoscapejs'
 import type cytoscape from 'cytoscape'
 import { Download, LocateFixed, Minus, Plus } from 'lucide-react'
 import type { DfsResponse, FlowResponse, GraphResponse, KnockoutResponse, Mode, MstResponse, UnionFindResponse } from '../types'
+import { COLOR_ARISTA_NORMAL, COLOR_VIA, ETIQUETA_VIA, LEGEND_ENTRIES, colorComponente } from '../theme'
 
 export interface ViewState {
   mode: Mode
@@ -66,21 +67,21 @@ const STYLESHEET: cytoscape.StylesheetJson = [
   },
   {
     selector: 'node:selected',
-    style: { 'border-width': 3, 'border-style': 'solid', 'border-color': '#ffffff', 'font-weight': 'bold' },
+    style: { 'border-width': 3, 'border-style': 'solid', 'border-color': '#0ea5e9', 'font-weight': 'bold' },
   },
   {
     selector: 'edge',
     style: {
       width: 'mapData(combined_score, 400, 1000, 0.8, 4)',
       'line-color': '#ffffff',
-      opacity: 'mapData(combined_score, 400, 1000, 0.18, 0.8)' as unknown as number,
+      opacity: 'mapData(combined_score, 400, 1000, 0.15, 0.5)' as unknown as number,
       'curve-style': 'haystack',
     },
   },
   { selector: 'node.faded', style: { opacity: 0.12 } },
   { selector: 'edge.faded, edge.edgefaded', style: { opacity: 0.1 } },
   { selector: 'edge.mst', style: { width: 4.5, 'line-color': '#ffffff', opacity: 1, 'curve-style': 'bezier' } },
-  { selector: 'edge.flow', style: { 'line-color': '#00b7ff', opacity: 1, 'curve-style': 'bezier', 'z-index': 50 } },
+  { selector: 'edge.flow', style: { 'line-color': '#a3e635', opacity: 1, 'curve-style': 'bezier', 'z-index': 50 } },
   {
     selector: 'edge.cut',
     style: {
@@ -117,8 +118,8 @@ const STYLESHEET: cytoscape.StylesheetJson = [
   },
 ]
 
-/** Color distinto por componente (ángulo áureo en HSL, estilo neón). */
-export const colorComponente = (i: number) => `hsl(${(i * 137.508) % 360}, 100%, 60%)`
+/** Colores por componente (islas Union-Find) — definidos en ../theme.ts. */
+export { colorComponente }
 
 export default function GraphCanvas({ graph, selected, focus, view, onNodeTap, onBackgroundTap }: Props) {
   const cyRef = useRef<cytoscape.Core | null>(null)
@@ -280,12 +281,12 @@ export default function GraphCanvas({ graph, selected, focus, view, onNodeTap, o
     const cy = cyRef.current
     if (!cy) return
     const a = document.createElement('a')
-    a.href = cy.png({ full: true, bg: '#000814', scale: 2 })
+    a.href = cy.png({ full: true, bg: '#0B1120', scale: 2 })
     a.download = `red_proteinas_${graph.via}_${graph.min_score}.png`
     a.click()
   }
 
-  const btn = 'p-2 rounded-md bg-[#02101f]/90 border panel-borde hover:border-[#00e5ff] hover:text-[#00e5ff] transition'
+  const btn = 'p-2 rounded-md bg-[#1E293B]/90 border border-[#1E293B] hover:border-[#0ea5e9] hover:text-[#0ea5e9] transition'
 
   return (
     <div className="relative h-full w-full canvas-bg">
@@ -298,9 +299,31 @@ export default function GraphCanvas({ graph, selected, focus, view, onNodeTap, o
         maxZoom={4}
         wheelSensitivity={0.25}
       />
+      {/* Leyenda visual fija (esquina superior izquierda del lienzo) */}
+      <div className="absolute top-4 left-4 z-30 w-64 rounded-lg border border-[#1E293B] bg-[#111827]/90 backdrop-blur-md p-3 shadow-xl">
+        <div className="mb-2 text-[#94a3b8] font-bold uppercase tracking-wider text-[10px]">Vías</div>
+        <div className="space-y-1.5 mb-3">
+          {LEGEND_ENTRIES.map((e) => (
+            <div key={e.via} className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 shrink-0 rounded-full" style={{ background: COLOR_VIA[e.via] }} />
+              <span className="text-[#cbd5e1] leading-none">{ETIQUETA_VIA[e.via]}</span>
+            </div>
+          ))}
+        </div>
+        <div className="border-t border-[#1E293B] pt-2 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 shrink-0 rounded-full border border-[#cbd5e1]/40 bg-[#cbd5e1]/10" />
+            <span className="text-[#94a3b8] text-[11px] leading-none">Tamaño del nodo = Association Score</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 shrink-0" style={{ border: '1px dashed #cbd5e180', borderRadius: 2 }} />
+            <span className="text-[#94a3b8] text-[11px] leading-none">Borde punteado = Hub</span>
+          </div>
+        </div>
+      </div>
       {tip && (
         <div
-          className="pointer-events-none absolute z-20 rounded-md border panel-borde bg-[#02101f]/95 px-2 py-1 text-xs shadow-lg"
+          className="pointer-events-none absolute z-20 rounded-md border border-[#1E293B] bg-[#1E293B]/95 px-2 py-1 text-xs shadow-lg"
           style={{ left: tip.x + 14, top: tip.y - 10 }}
         >
           <b>{tip.id}</b>
@@ -313,7 +336,7 @@ export default function GraphCanvas({ graph, selected, focus, view, onNodeTap, o
         <button className={btn} title="Re-centrar (R)" onClick={recentrar}><LocateFixed size={16} /></button>
         <button className={btn} title="Exportar PNG" onClick={exportarPng}><Download size={16} /></button>
       </div>
-      <div className="absolute bottom-4 left-4 z-10 rounded-md bg-[#02101f]/80 px-2 py-1 text-[11px] text-slate-400">
+      <div className="absolute bottom-4 left-4 z-10 rounded-md bg-[#111827]/80 px-2 py-1 text-[11px] text-[#94a3b8]">
         {graph.total_nodos} nodos · {graph.total_aristas} aristas · R = re-centrar
       </div>
     </div>

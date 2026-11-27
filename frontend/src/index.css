@@ -1,10 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --fondo: #000814;
-  --brillo: #061c38;
-  --texto: #dfe8f5;
-  --borde: #24405f;
+  --fondo: #0B1120;
+  --panel: #111827;
+  --card: #1E293B;
+  --card-hover: #273549;
+  --borde: #1E293B;
+  --texto: #f1f5f9;
+  --texto-suave: #cbd5e1;
+  --texto-mute: #94a3b8;
+  --acento: #0ea5e9;
 }
 
 html, body, #root { height: 100%; margin: 0; }
@@ -15,16 +20,43 @@ body {
   overflow: hidden;
 }
 
+/* Lienzo principal: Slate 950 profundo con cuadrícula de puntos sutil */
 .canvas-bg {
-  background: radial-gradient(circle at center, var(--brillo) 0%, var(--fondo) 75%);
+  background: var(--fondo);
+  background-image:
+    radial-gradient(circle at center, #1e293b 0%, #0b1120 75%),
+    radial-gradient(#94a3b8 0.6px, transparent 0.6px);
+  background-size: 100% 100%, 22px 22px;
 }
 
-.panel-borde { border-color: var(--borde); }
+/* Paneles laterales y barra superior: Slate 900, bordes finos Slate 800, backdrop-blur */
+.panel-shell {
+  background: var(--panel);
+  border-color: var(--borde);
+}
+
+/* Tarjetas internas */
+.card {
+  background: var(--card);
+  border: 1px solid var(--borde);
+}
+.card:hover {
+  background: var(--card-hover);
+}
+
+/* Ícono de ayuda (tooltip nativo) */
+.help-icon {
+  opacity: 0.55;
+}
+.help-icon:hover {
+  opacity: 1;
+  cursor: help;
+}
 
 /* scrollbars oscuros */
 * { scrollbar-width: thin; scrollbar-color: #24405f transparent; }
 
-input[type="range"] { accent-color: #00e5ff; }
+input[type="range"] { accent-color: var(--acento); }
 select, input[type="text"], input[type="number"], input[type="search"] {
   background: #02101f;
   border: 1px solid var(--borde);
@@ -33,4 +65,15 @@ select, input[type="text"], input[type="number"], input[type="search"] {
   padding: 4px 8px;
   outline: none;
 }
-select:focus, input:focus { border-color: #00e5ff; }
+select:focus, input:focus { border-color: var(--acento); }
+
+/* Utilidades de color semántico (usadas en badges y leyendas) */
+.text-emerald { color: #10b981; }
+.text-fuchsia { color: #f43f5e; }
+.text-sky { color: #0ea5e9; }
+.text-amber { color: #f59e0b; }
+.bg-emerald\/20 { background-color: rgba(16, 185, 129, 0.2); }
+.bg-fuchsia\/20 { background-color: rgba(244, 63, 94, 0.2); }
+.bg-sky\/20 { background-color: rgba(14, 165, 233, 0.2); }
+.bg-amber\/20 { background-color: rgba(245, 158, 11, 0.2); }
+

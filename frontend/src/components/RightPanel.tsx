@@ -1,5 +1,7 @@
 import { FlaskConical, Plus, Trash2, X } from 'lucide-react'
 import type { KnockoutResponse, NodeData, ProteinDetail } from '../types'
+import { colorVia } from '../theme'
+import InterpretacionResultado from './InterpretacionResultado'
 
 interface Props {
   inspected: string | null
@@ -25,16 +27,16 @@ const ETIQUETA_VIA: Record<string, string> = {
 }
 
 export default function RightPanel(p: Props) {
-  const color = p.node?.color ?? p.detail?.color ?? '#ffbb00'
+  const color = colorVia(p.node?.via ?? p.detail?.vias[0] ?? 'asociado')
   const via = p.node?.via ?? p.detail?.vias[0] ?? 'asociado'
   const yaKo = !!p.inspected && p.koGenes.includes(p.inspected)
 
   return (
-    <aside className="flex w-80 shrink-0 flex-col overflow-y-auto border-l-2 border-white">
-      <section className="border-b panel-borde p-4">
-        <div className="mb-2 text-xs uppercase tracking-wide text-slate-400">Inspector biológico</div>
+    <aside className="flex w-80 shrink-0 flex-col overflow-y-auto border-l border-[#1E293B] bg-[#111827]">
+      <section className="border-b border-[#1E293B] p-4">
+        <div className="mb-2 text-xs uppercase tracking-wide text-[#94a3b8]">Inspector biológico</div>
         {!p.inspected ? (
-          <p className="text-sm text-slate-500">Haz clic en un nodo del grafo para ver su ficha.</p>
+          <p className="text-sm text-[#94a3b8]">Haz clic en un nodo del grafo para ver su ficha.</p>
         ) : (
           <>
             <div className="mb-3 flex items-center gap-2">
@@ -52,14 +54,14 @@ export default function RightPanel(p: Props) {
               <dd>{p.node ? (p.node.is_seed ? 'sí' : 'no') : '—'}</dd>
             </dl>
             {!p.node && (
-              <p className="mt-2 text-xs text-[#ffbb00]">Esta proteína no está en el subgrafo actual.</p>
+              <p className="mt-2 text-xs text-[#f59e0b]">Esta proteína no está en el subgrafo actual.</p>
             )}
           </>
         )}
       </section>
 
-      <section className="border-b panel-borde p-4">
-        <div className="mb-2 flex items-center gap-1 text-xs uppercase tracking-wide text-slate-400">
+      <section className="border-b border-[#1E293B] p-4">
+        <div className="mb-2 flex items-center gap-1 text-xs uppercase tracking-wide text-[#94a3b8]">
           <FlaskConical size={13} /> Simulador knockout
         </div>
         <button
@@ -81,30 +83,30 @@ export default function RightPanel(p: Props) {
               ))}
             </div>
             <button onClick={p.onClearKo}
-                    className="mt-2 flex w-full items-center justify-center gap-1 rounded-md border panel-borde py-1.5 text-xs hover:border-slate-300">
+                    className="mt-2 flex w-full items-center justify-center gap-1 rounded-md border border-[#1E293B] py-1.5 text-xs hover:border-[#94a3b8]">
               <Trash2 size={12} /> Limpiar Knockout
             </button>
           </>
         )}
-        {p.koBusy && <div className="mt-2 text-xs text-[#ffbb00]">simulando…</div>}
+        {p.koBusy && <div className="mt-2 text-xs text-[#f59e0b]">simulando…</div>}
         {p.koError && <div className="mt-2 text-xs text-[#ff7a7a]">{p.koError}</div>}
 
         {p.ko && (
-          <div className="mt-3 space-y-2 rounded-md border panel-borde bg-[#02101f] p-2 text-xs">
-            <div>Islas: <b>{p.ko.union_find.componentes_antes}</b> → <b className="text-[#ffbb00]">{p.ko.union_find.componentes_despues}</b>
+          <div className="mt-3 space-y-2 rounded-md border border-[#1E293B] bg-[#1E293B] p-2 text-xs">
+            <div>Islas: <b>{p.ko.union_find.componentes_antes}</b> → <b className="text-[#f59e0b]">{p.ko.union_find.componentes_despues}</b>
               {' '}· aristas eliminadas: <b>{p.ko.aristas_eliminadas}</b></div>
             <div>
-              <span className="text-[#ff7a7a]">Proteínas aisladas ({p.ko.proteinas_aisladas.length}):</span>{' '}
+              <span className="text-[#f43f5e]">Proteínas aisladas ({p.ko.proteinas_aisladas.length}):</span>{' '}
               {p.ko.proteinas_aisladas.length ? p.ko.proteinas_aisladas.join(', ') : 'ninguna'}
             </div>
             {p.ko.proteinas_perdieron_conexion.length > 0 && (
               <div>
-                <span className="text-[#ffbb00]">Perdieron conexión ({p.ko.proteinas_perdieron_conexion.length}):</span>{' '}
+                <span className="text-[#f59e0b]">Perdieron conexión ({p.ko.proteinas_perdieron_conexion.length}):</span>{' '}
                 {p.ko.proteinas_perdieron_conexion.join(', ')}
               </div>
             )}
             <div>
-              <span className="text-[#ffbb00]">Pares semilla desconectados ({p.ko.total_pares_desconectados}):</span>
+              <span className="text-[#f59e0b]">Pares semilla desconectados ({p.ko.total_pares_desconectados}):</span>
               {p.ko.pares_semilla_desconectados.length === 0 ? ' ninguno' : (
                 <ul className="mt-0.5 max-h-24 overflow-y-auto font-mono">
                   {p.ko.pares_semilla_desconectados.map(([a, b]) => <li key={a + b}>{a} ⇎ {b}</li>)}
@@ -112,26 +114,27 @@ export default function RightPanel(p: Props) {
               )}
             </div>
             {p.ko.previamente_aislados > 0 && (
-              <div className="text-slate-500">{p.ko.previamente_aislados} proteínas ya estaban aisladas antes del knockout.</div>
+              <div className="text-[#94a3b8]">{p.ko.previamente_aislados} proteínas ya estaban aisladas antes del knockout.</div>
             )}
+            <InterpretacionResultado tipo="ko" ko={p.ko} />
           </div>
         )}
       </section>
 
       <section className="p-4">
-        <div className="mb-2 text-xs uppercase tracking-wide text-slate-400">
+        <div className="mb-2 text-xs uppercase tracking-wide text-[#94a3b8]">
           Interacciones directas {p.detail && `(${p.detail.interacciones.length})`}
         </div>
-        {p.detailError && <div className="text-xs text-[#ff7a7a]">{p.detailError}</div>}
+        {p.detailError && <div className="text-xs text-[#f43f5e]">{p.detailError}</div>}
         {p.detail && (
           <ul className="space-y-0.5">
             {p.detail.interacciones.map((i) => (
               <li key={i.symbol} onClick={() => p.onNavigate(i.symbol)}
-                  className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-sm hover:bg-[#0a2a4a]">
+                  className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-sm hover:bg-[#273549]">
                 <span>{i.symbol}</span>
                 <span className="flex items-center gap-2">
-                  <span className="h-1.5 rounded bg-[#00e5ff]" style={{ width: `${(i.combined_score / 1000) * 40}px` }} />
-                  <span className="font-mono text-xs text-slate-400">{i.combined_score}</span>
+                  <span className="h-1.5 rounded bg-[#0ea5e9]" style={{ width: `${(i.combined_score / 1000) * 40}px` }} />
+                  <span className="font-mono text-xs text-[#94a3b8]">{i.combined_score}</span>
                 </span>
               </li>
             ))}
